@@ -5,6 +5,8 @@
                 :<content-node>
                 :<text-node>
                 :<code-block>
+                :<document-link>
+                :<web-link>
                 :<definition>
                 :<unordered-list>
                 :<ordered-list>
@@ -85,6 +87,21 @@
     (make-instance '<code-block>
                    :language language
                    :children (parse children))))
+
+;; Links
+
+(define-attr-parser "link" (attributes children)
+  (let ((sec-ref (gethash "sec" attributes))
+        (doc-ref (gethash "doc" attributes)))
+    (make-instance '<document-link>
+                   :section-reference sec-ref
+                   :document-reference doc-ref
+                   :children (parse children))))
+
+(define-attr-parser "uri" (attributes children)
+  (let* ((uri-text (gethash "uri" attributes))
+         (uri (quri:uri uri-text)))
+    (make-instance '<web-link> :uri uri :children (parse children))))
 
 ;; Lists
 
