@@ -26,15 +26,22 @@
                 :<table>
                 :<row>
                 :<cell>
-                :<section>))
+                :<section>
+                :children
+                :text
+                :document-reference
+                :section-reference
+                :uri))
 (in-package :common-doc-plump-test.parser)
 
 ;;; Utilities
 
-(defmacro test-parse (xml class)
-  `(let* ((node (elt (plump:children (plump:parse ,xml)) 0))
+(defmacro test-parse (xml class &rest tests)
+  `(let* ((plump:*tag-dispatchers* plump:*xml-tags*)
+          (node (elt (plump:children (plump:parse ,xml)) 0))
           (parsed (common-doc-plump.parser:parse node)))
-     (is-true (typep parsed ',class))))
+     (is-true (typep parsed ',class))
+     ,@tests))
 
 (defun mk-tag (tag-name &optional (content "test"))
   (format nil "<~A>~A</~A>" tag-name content tag-name))
@@ -47,6 +54,13 @@
      ,@(loop for class in classes collecting
          `(test-tag (common-doc:find-tag (find-class ',class))
                     ,class))))
+
+(defmacro test-child ()
+  `(progn
+     (is-true (typep (first (children parsed))
+                     '<text-node>))
+     (is-true (text (first (children parsed)))
+              "test")))
 
 ;;; Tests
 
@@ -68,5 +82,22 @@
               <inline-quote>
               <block-quote>
               <list-item>)
+
+(test code
+  (test-parse (mk-tag "code") <code-block>
+    (test-child)))
+
+(test links
+  (test-parse "<ref doc=\"document\" sec=\"section\">test</ref>"
+              <document-link>
+    (is (equal (document-reference parsed) "document"))
+    (is (equal (section-reference parsed) "section"))
+    (test-child)))
+
+(test uri
+  (test-parse "<link uri=\"test\">test</link>"
+              <web-link>
+    (is (equal (quri:render-uri (uri parsed)) "test"))
+    (test-child)))
 
 (run! 'tests)

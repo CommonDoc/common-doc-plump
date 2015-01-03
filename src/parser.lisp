@@ -90,7 +90,7 @@
 
 ;; Links
 
-(define-attr-parser "link" (attributes children)
+(define-attr-parser "ref" (attributes children)
   (let ((sec-ref (gethash "sec" attributes))
         (doc-ref (gethash "doc" attributes)))
     (make-instance '<document-link>
@@ -98,7 +98,7 @@
                    :document-reference doc-ref
                    :children (parse children))))
 
-(define-attr-parser "uri" (attributes children)
+(define-attr-parser "link" (attributes children)
   (let* ((uri-text (gethash "uri" attributes))
          (uri (quri:uri uri-text)))
     (make-instance '<web-link> :uri uri :children (parse children))))
