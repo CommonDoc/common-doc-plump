@@ -11,6 +11,7 @@
                 :<unordered-list>
                 :<ordered-list>
                 :<definition-list>
+                :<image>
                 :<figure>
                 :<section>
                 :<document>)
@@ -91,11 +92,11 @@
 ;; Links
 
 (define-attr-parser "ref" (attributes children)
-  (let ((sec-ref (gethash "sec" attributes))
-        (doc-ref (gethash "doc" attributes)))
+  (let ((doc-ref (gethash "doc" attributes))
+        (sec-ref (gethash "sec" attributes)))
     (make-instance '<document-link>
-                   :section-reference sec-ref
                    :document-reference doc-ref
+                   :section-reference sec-ref
                    :children (parse children))))
 
 (define-attr-parser "link" (attributes children)
@@ -112,6 +113,10 @@
                    :term (parse term)
                    :definition (make-instance '<content-node>
                                               :children (parse definition)))))
+
+(define-attr-parser "image" (attributes children)
+  (let ((source (gethash "source" attributes)))
+    (make-instance '<image> :source source)))
 
 (define-parser "figure" (children)
   (let ((image (find-tag-by-name "image" children))
