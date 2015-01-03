@@ -87,14 +87,14 @@
   (test-parse (mk-tag "code") <code-block>
     (test-child)))
 
-(test links
+(test refs
   (test-parse "<ref doc=\"document\" sec=\"section\">test</ref>"
               <document-link>
     (is (equal (document-reference parsed) "document"))
     (is (equal (section-reference parsed) "section"))
     (test-child)))
 
-(test uri
+(test links
   (test-parse "<link uri=\"test\">test</link>"
               <web-link>
     (is (equal (quri:render-uri (uri parsed)) "test"))
