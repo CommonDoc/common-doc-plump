@@ -1,17 +1,52 @@
 (in-package :cl-user)
 (defpackage common-doc-plump-test.parser
-  (:use :cl :fiveam))
+  (:use :cl :fiveam)
+  (:import-from :common-doc
+                :<text-node>
+                :<paragraph>
+                :<bold>
+                :<italic>
+                :<underline>
+                :<strikethrough>
+                :<code>
+                :<superscript>
+                :<subscript>
+                :<code-block>
+                :<inline-quote>
+                :<block-quote>
+                :<document-link>
+                :<web-link>
+                :<list-item>
+                :<definition>
+                :<unordered-list>
+                :<ordered-list>
+                :<definition-list>
+                :<image>
+                :<figure>
+                :<table>
+                :<row>
+                :<cell>
+                :<section>))
 (in-package :common-doc-plump-test.parser)
 
 ;;; Utilities
 
-(defmacro test-parse ((plump-class &rest plump-attributes)
-                      (common-doc-class))
-  `(let* ((node (make-instance ',plump-class
-                               :parent nil
-                               ,@plump-attributes))
+(defmacro test-parse (xml class)
+  `(let* ((node (elt (plump:children (plump:parse ,xml)) 0))
           (parsed (common-doc-plump.parser:parse node)))
-     (is-true (typep parsed ',common-doc-class))))
+     (is-true (typep parsed ',class))))
+
+(defun mk-tag (tag-name &optional (content "test"))
+  (format nil "<~A>~A</~A>" tag-name content tag-name))
+
+(defmacro test-tag (tag-name class)
+  `(test-parse (mk-tag ,tag-name) ,class))
+
+(defmacro test-classes (&rest classes)
+  `(test trivial-tags
+     ,@(loop for class in classes collecting
+         `(test-tag (common-doc:find-tag (find-class ',class))
+                    ,class))))
 
 ;;; Tests
 
@@ -20,7 +55,18 @@
 (in-suite tests)
 
 (test trivial
-  (test-parse (plump:text-node :text "test")
-      (common-doc:<text-node>)))
+  (test-parse "test" <text-node>))
+
+(test-classes <paragraph>
+              <bold>
+              <italic>
+              <underline>
+              <strikethrough>
+              <code>
+              <superscript>
+              <subscript>
+              <inline-quote>
+              <block-quote>
+              <list-item>)
 
 (run! 'tests)
