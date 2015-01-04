@@ -5,7 +5,8 @@
   :version "0.1"
   :depends-on (:common-doc
                :plump
-               :anaphora)
+               :anaphora
+               :cl-markup)
   :components ((:module "src"
                 :serial t
                 :components

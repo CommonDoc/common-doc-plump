@@ -58,11 +58,15 @@
         (children (plump:children node)))
     (aif (gethash name *parsers*)
          (funcall it attributes children)
-         (let ((tag-class (common-doc:find-node name)))
+         (let* ((tag-class (common-doc:find-node name))
+                (special-slots (common-doc:find-special-slots tag-class)))
            (if tag-class
-               (make-instance tag-class
-                              :metadata attributes
-                              :children (parse children))
+               (let ((instance (make-instance tag-class
+                                              :children (parse children))))
+                 (when special-slots
+                   ;; ...
+                   )
+                 instance)
                (make-instance 'common-doc.macro:<macro-node>
                               :name name
                               :metadata attributes
@@ -115,8 +119,9 @@
                                               :children (parse definition)))))
 
 (define-attr-parser "image" (attributes children)
-  (let ((source (gethash "source" attributes)))
-    (make-instance '<image> :source source)))
+  (let ((source (gethash "source" attributes))
+        (desc (gethash "desc" attributes)))
+    (make-instance '<image> :source source :description desc)))
 
 (define-parser "figure" (children)
   (let ((image (find-tag-by-name "image" children))
