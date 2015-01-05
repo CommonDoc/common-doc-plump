@@ -49,8 +49,11 @@
     (parse elem)))
 
 (defmethod parse ((root plump:root))
-  (make-instance '<content-node>
-                 :children (parse (plump:children root))))
+  (let ((child (find-if #'(lambda (node)
+                            (or (plump:element-p node)
+                                (typep node 'plump:text-node)))
+                        (plump:children root))))
+    (parse child)))
 
 (defmethod parse ((node plump:element))
   (let ((name (plump:tag-name node))
@@ -77,6 +80,12 @@
 (defmacro define-attr-parser (name (attrs args) &rest body)
   `(setf (gethash ,name *parsers*)
          #'(lambda (,attrs ,args)
+             ,@body)))
+
+(defmacro define-attr-only-parser (name (attrs) &rest body)
+  `(setf (gethash ,name *parsers*)
+         #'(lambda (,attrs children)
+             (declare (ignore children))
              ,@body)))
 
 (defmacro define-parser (name (args) &rest body)
@@ -118,7 +127,7 @@
                    :definition (make-instance '<content-node>
                                               :children (parse definition)))))
 
-(define-attr-parser "image" (attributes children)
+(define-attr-only-parser "image" (attributes)
   (let ((source (gethash "source" attributes))
         (desc (gethash "desc" attributes)))
     (make-instance '<image> :source source :description desc)))

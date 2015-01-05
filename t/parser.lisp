@@ -38,8 +38,8 @@
 
 (defmacro test-parse (xml class &rest tests)
   `(let* ((plump:*tag-dispatchers* plump:*xml-tags*)
-          (node (elt (plump:children (plump:parse ,xml)) 0))
-          (parsed (common-doc-plump.parser:parse node)))
+          (plump-node (plump:parse ,xml))
+          (parsed (common-doc-plump.parser:parse plump-node)))
      (is-true (typep parsed ',class))
      ,@tests))
 
@@ -56,11 +56,9 @@
                     ,class))))
 
 (defmacro test-child ()
-  `(progn
-     (is-true (typep (first (children parsed))
-                     '<text-node>))
-     (is-true (text (first (children parsed)))
-              "test")))
+  `(let ((text-node (first (children parsed))))
+     (is-true (typep text-node '<text-node>))
+     (is-true (text text-node) "test")))
 
 ;;; Tests
 
