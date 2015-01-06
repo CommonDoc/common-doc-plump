@@ -1,6 +1,7 @@
 (in-package :cl-user)
 (defpackage common-doc-plump-test.parser
-  (:use :cl :fiveam :common-doc))
+  (:use :cl :fiveam :common-doc)
+  (:export :parser))
 (in-package :common-doc-plump-test.parser)
 
 ;;; Utilities
@@ -31,9 +32,9 @@
 
 ;;; Tests
 
-(def-suite tests
-  :description "vertex tests.")
-(in-suite tests)
+(def-suite parser
+  :description "VerTeX parser tests.")
+(in-suite parser)
 
 (test trivial
   (test-parse "test" <text-node>))
@@ -101,5 +102,3 @@
                "title"))
     (is (equal (text (first (children parsed)))
                "test"))))
-
-(run! 'tests)

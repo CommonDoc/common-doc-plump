@@ -6,4 +6,6 @@
   :components ((:module "t"
                 :serial t
                 :components
-                ((:file "parser")))))
+                ((:file "parser")
+                 (:file "emitter")
+                 (:file "common-doc-plump")))))

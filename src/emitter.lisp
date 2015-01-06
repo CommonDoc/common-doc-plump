@@ -1,25 +1,7 @@
 (in-package :cl-user)
 (defpackage common-doc-plump.emitter
-  (:use :cl :anaphora)
-  (:import-from :common-doc
-                ;; Classes
-                :<text-node>
-                :<code-block>
-                :<document-link>
-                :<web-link>
-                :<definition>
-                :<list>
-                :<image>
-                :<figure>
-                ;; Slots
-                :text
-                :children
-                :language
-                :document-reference
-                :section-reference
-                :uri
-                :term
-                :definition)
+  (:use :cl :anaphora :common-doc)
+  (:export :emit)
   (:documentation "Emit a Plump DOM from a CommonDoc document."))
 (in-package :common-doc-plump.emitter)
 
@@ -41,6 +23,10 @@ contexts."
     (write-string (text node) markup:*output-stream*)
     nil))
 
+(defmethod doc->xml ((list list))
+  (loop for child in list do
+    (doc->xml child)))
+
 (defmethod doc->xml ((code <code-block>))
   (html (:code :language (language code)
                (doc->xml (children code)))))
@@ -61,13 +47,21 @@ contexts."
   (html (:term (doc->xml (term def)))
         (:def (doc->xml (definition def)))))
 
-(defmethod doc->xml ((list <list>))
-  (let ((list-tag (common-doc:find-tag (class-of list))))
-    (progn
-      (cl-markup:markup* (cons list-tag (doc->xml (children list))))
-      nil)))
+(defmethod doc->xml ((item <list-item>))
+  (html (:item (doc->xml (children item)))))
 
-(defun emit (node stream)
+(defmethod doc->xml ((list <unordered-list>))
+  (html (:list (doc->xml (children list)))))
+
+(defmethod doc->xml ((list <ordered-list>))
+  (html (:enum (doc->xml (children list)))))
+
+(defmethod doc->xml ((list <definition-list>))
+  (html (:deflist (doc->xml (children list)))))
+
+(defun emit (node)
   "Produce a Plump node from a CommonDoc document."
-  (let ((markup:*output-stream* stream))
-    (plump:parse (doc->xml node))))
+  (plump:parse
+   (with-output-to-string (stream)
+     (let ((markup:*output-stream* stream))
+       (doc->xml node)))))
