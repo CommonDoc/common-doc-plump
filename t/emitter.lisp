@@ -18,6 +18,14 @@
        (plump:serialize (doc->plump ,document) stream))
      ,xml)))
 
+(defmacro test-markup (&rest classes)
+  `(progn
+     ,@(loop for class in classes collecting
+         `(test-emit (make-instance ',class
+                                    :children (list (make-text "test")))
+                     (let ((tag (find-tag (find-class ',class))))
+                       (format nil "<~A>test</~A>" tag tag))))))
+
 ;;; Tests
 
 (def-suite emitter
@@ -26,6 +34,18 @@
 
 (test text
   (test-emit (make-text "test") "test"))
+
+(test markup
+  (test-markup <paragraph>
+               <bold>
+               <italic>
+               <underline>
+               <strikethrough>
+               <code>
+               <superscript>
+               <subscript>
+               <inline-quote>
+               <block-quote>))
 
 (test lists
   (let ((elems (list "1" "2" "3")))

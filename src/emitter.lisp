@@ -27,6 +27,30 @@ contexts."
   (loop for child in list do
     (doc->xml child)))
 
+(defmacro define-trivial-emitters (&rest classes)
+  `(progn
+    ,@(loop for class in classes collecting
+        `(defmethod doc->xml ((node ,class))
+           (let ((tag (find-tag (find-class ',class))))
+             (write-string (format nil "<~A>" tag)
+                           markup:*output-stream*)
+             (doc->xml (children node))
+             (write-string (format nil "</~A>" tag)
+                           markup:*output-stream*)
+             nil)))))
+
+(define-trivial-emitters
+  <paragraph>
+  <bold>
+  <italic>
+  <underline>
+  <strikethrough>
+  <code>
+  <superscript>
+  <subscript>
+  <inline-quote>
+  <block-quote>)
+
 (defmethod doc->xml ((code <code-block>))
   (html (:code :language (language code)
                (doc->xml (children code)))))
@@ -43,12 +67,12 @@ contexts."
   (html (:link :uri (quri:render-uri (uri link))
                (doc->xml (children link)))))
 
+(defmethod doc->xml ((item <list-item>))
+  (html (:item (doc->xml (children item)))))
+
 (defmethod doc->xml ((def <definition>))
   (html (:term (doc->xml (term def)))
         (:def (doc->xml (definition def)))))
-
-(defmethod doc->xml ((item <list-item>))
-  (html (:item (doc->xml (children item)))))
 
 (defmethod doc->xml ((list <unordered-list>))
   (html (:list (doc->xml (children list)))))
@@ -58,6 +82,17 @@ contexts."
 
 (defmethod doc->xml ((list <definition-list>))
   (html (:deflist (doc->xml (children list)))))
+
+;;; Figures
+
+(defmethod doc->xml ((image <image>))
+  (html (:image :src (source image)
+                :desc (description image)
+                "")))
+
+;;; Tables
+
+;;; Emitter
 
 (defun emit (node)
   "Produce a Plump node from a CommonDoc document."
