@@ -27,12 +27,14 @@
 
 (defun find-tag-by-name (tag-name vector)
   (find-if #'(lambda (node)
-               (equal (plump:tag-name node) tag-name))
+               (and (plump:element-p node)
+                    (equal (plump:tag-name node) tag-name)))
            vector))
 
 (defun tags-without-name (tag-name vector)
   (find-if-not #'(lambda (node)
-                   (equal (plump:tag-name node) tag-name))
+                   (and (plump:element-p node)
+                        (equal (plump:tag-name node) tag-name)))
                vector))
 
 ;;; Methods
@@ -140,10 +142,10 @@
   (let ((image (find-tag-by-name "image" children))
         (description (tags-without-name "image" children)))
     (make-instance '<figure>
-                   :image image
+                   :image (parse image)
                    :description
                    (make-instance '<content-node>
-                                  :children (parse description)))))
+                                  :children (list (parse description))))))
 
 ;; Structure
 

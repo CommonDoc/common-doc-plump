@@ -83,4 +83,15 @@
     (is (equal (source parsed) "src"))
     (is (equal (description parsed) "desc"))))
 
+(test figure
+  (test-parse "<figure><image src='src' desc='desc'/>desc</figure>"
+              <figure>
+  (let ((image (image parsed))
+        (desc (description parsed)))
+    (is-true (typep image '<image>))
+    (is (equal (source image) "src"))
+    (is (equal (description image) "desc"))
+    (is (equal (text (first (children desc)))
+               "desc")))))
+
 (run! 'tests)
