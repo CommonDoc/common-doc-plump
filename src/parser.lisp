@@ -119,13 +119,27 @@
 
 ;; Lists
 
-(define-parser "def" (children)
-  (let ((term (find-tag-by-name "term" children))
-        (definition (tags-without-name "term" children)))
-    (make-instance '<definition>
-                   :term (parse term)
-                   :definition (make-instance '<content-node>
-                                              :children (parse definition)))))
+(define-parser "deflist" (children)
+  (make-instance '<definition-list>
+                 :children
+                 (let* ((children-vector
+                          (remove-if-not
+                           #'(lambda (child)
+                               (plump:element-p child))
+                           children))
+                        (element-children
+                          (loop for elem across children-vector
+                                collecting elem)))
+                   (loop for (term def) on element-children
+                         by #'cddr
+                         collecting
+                     (let ((term (make-instance '<content-node>
+                                                :children (parse (plump:children term))))
+                           (def (make-instance '<content-node>
+                                               :children (parse (plump:children def)))))
+                       (make-instance '<definition>
+                                      :term term
+                                      :definition def))))))
 
 (define-attr-only-parser "image" (attributes)
   (let ((source (gethash "source" attributes))

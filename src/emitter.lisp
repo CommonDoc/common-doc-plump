@@ -58,8 +58,8 @@ contexts."
                (doc->xml (children link)))))
 
 (defmethod doc->xml ((def <definition>))
-  (html (:def (:term (doc->xml (term def)))
-            (doc->xml (definition def)))))
+  (html (:term (doc->xml (term def)))
+        (:def (doc->xml (definition def)))))
 
 (defmethod doc->xml ((list <list>))
   (let ((list-tag (common-doc:find-tag (class-of list))))
