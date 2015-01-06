@@ -67,8 +67,9 @@
                (let ((instance (make-instance tag-class
                                               :children (parse children))))
                  (when special-slots
-                   ;; ...
-                   )
+                   (loop for (attr-name . slot-name) in special-slots do
+                     (setf (slot-value instance slot-name)
+                           (gethash attr-name attributes))))
                  instance)
                (make-instance 'common-doc.macro:<macro-node>
                               :name name
@@ -93,14 +94,6 @@
          #'(lambda (attrs ,args)
              (declare (ignore attrs))
              ,@body)))
-
-;; Code blocks
-
-(define-attr-parser "code" (attributes children)
-  (let ((language (gethash "language" attributes)))
-    (make-instance '<code-block>
-                   :language language
-                   :children (parse children))))
 
 ;; Links
 
