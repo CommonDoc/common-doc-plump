@@ -64,8 +64,10 @@
          (let* ((tag-class (common-doc:find-node name))
                 (special-slots (common-doc:find-special-slots tag-class)))
            (if tag-class
-               (let ((instance (make-instance tag-class
-                                              :children (parse children))))
+               (let ((instance (if (> (length children) 0)
+                                   (make-instance tag-class
+                                                  :children (parse children))
+                                   (make-instance tag-class))))
                  (when special-slots
                    (loop for (attr-name . slot-name) in special-slots do
                      (setf (slot-value instance slot-name)
@@ -133,11 +135,6 @@
                        (make-instance '<definition>
                                       :term term
                                       :definition def))))))
-
-(define-attr-only-parser "image" (attributes)
-  (let ((source (gethash "source" attributes))
-        (desc (gethash "desc" attributes)))
-    (make-instance '<image> :source source :description desc)))
 
 (define-parser "figure" (children)
   (let ((image (find-tag-by-name "image" children))

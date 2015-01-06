@@ -1,37 +1,6 @@
 (in-package :cl-user)
 (defpackage common-doc-plump-test.parser
-  (:use :cl :fiveam)
-  (:import-from :common-doc
-                :<text-node>
-                :<paragraph>
-                :<bold>
-                :<italic>
-                :<underline>
-                :<strikethrough>
-                :<code>
-                :<superscript>
-                :<subscript>
-                :<code-block>
-                :<inline-quote>
-                :<block-quote>
-                :<document-link>
-                :<web-link>
-                :<list-item>
-                :<definition>
-                :<unordered-list>
-                :<ordered-list>
-                :<definition-list>
-                :<image>
-                :<figure>
-                :<table>
-                :<row>
-                :<cell>
-                :<section>
-                :children
-                :text
-                :document-reference
-                :section-reference
-                :uri))
+  (:use :cl :fiveam :common-doc))
 (in-package :common-doc-plump-test.parser)
 
 ;;; Utilities
@@ -86,16 +55,32 @@
     (test-child)))
 
 (test refs
-  (test-parse "<ref doc=\"document\" sec=\"section\">test</ref>"
+  (test-parse "<ref doc='document' sec='section'>test</ref>"
               <document-link>
     (is (equal (document-reference parsed) "document"))
     (is (equal (section-reference parsed) "section"))
     (test-child)))
 
 (test links
-  (test-parse "<link uri=\"test\">test</link>"
+  (test-parse "<link uri='test'>test</link>"
               <web-link>
     (is (equal (quri:render-uri (uri parsed)) "test"))
     (test-child)))
+
+(test list
+  (loop for list-type in '("list" "enum") do
+    (let* ((elems (list "test" "test" "test"))
+           (list-xml (format nil "<~A>~{<item>~A</item>~}</~A>"
+                             list-type elems list-type)))
+      (test-parse list-xml <list>
+        (loop for child in (children parsed) do
+          (is-true (typep child '<list-item>))
+          (is (equal (text (first (children child))) "test")))))))
+
+(test image
+  (test-parse "<image src='src' desc='desc'/>"
+              <image>
+    (is (equal (source parsed) "src"))
+    (is (equal (description parsed) "desc"))))
 
 (run! 'tests)
