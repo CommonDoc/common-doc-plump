@@ -94,4 +94,12 @@
     (is (equal (text (first (children desc)))
                "desc")))))
 
+(test section
+  (test-parse "<section title='title'>test</section>"
+              <section>
+    (is (equal (text (title parsed))
+               "title"))
+    (is (equal (text (first (children parsed)))
+               "test"))))
+
 (run! 'tests)
