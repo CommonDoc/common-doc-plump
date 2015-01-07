@@ -11,20 +11,23 @@
 (defun doc->plump (doc)
   (common-doc-plump.emitter:emit doc))
 
-(defmacro test-emit (document xml)
+(defun xml->doc (xml)
+  (let* ((plump:*tag-dispatchers* plump:*xml-tags*)
+         (plump-node (plump:parse xml)))
+    (common-doc-plump.parser:parse plump-node)))
+
+(defmacro test-emit (xml)
   `(is
     (equal
+     ,xml
      (with-output-to-string (stream)
-       (plump:serialize (doc->plump ,document) stream))
-     ,xml)))
+       (plump:serialize (doc->plump (xml->doc ,xml)) stream)))))
 
-(defmacro test-markup (&rest classes)
+(defmacro trivial-tests (&rest classes)
   `(progn
      ,@(loop for class in classes collecting
-         `(test-emit (make-instance ',class
-                                    :children (list (make-text "test")))
-                     (let ((tag (find-tag (find-class ',class))))
-                       (format nil "<~A>test</~A>" tag tag))))))
+         `(let ((tag (find-tag (find-class ',class))))
+            (test-emit (format nil "<~A>test</~A>" tag tag))))))
 
 ;;; Tests
 
@@ -33,44 +36,43 @@
 (in-suite emitter)
 
 (test text
-  (test-emit (make-text "test") "test"))
+  (test-emit "test"))
 
-(test markup
-  (test-markup <paragraph>
-               <bold>
-               <italic>
-               <underline>
-               <strikethrough>
-               <code>
-               <superscript>
-               <subscript>
-               <inline-quote>
-               <block-quote>))
+(test trivial
+  (trivial-tests <paragraph>
+                 <bold>
+                 <italic>
+                 <underline>
+                 <strikethrough>
+                 <code>
+                 <superscript>
+                 <subscript>
+                 <inline-quote>
+                 <block-quote>))
+
+(test refs
+  (test-emit "<ref doc=\"doc\" sec=\"sec\"/>")
+  (test-emit "<ref sec=\"sec\"/>")
+  (test-emit "<ref sec=\"sec\">test</ref>"))
+
+(test links
+  (test-emit "<link uri=\"http://example.com/\">test</link>"))
 
 (test lists
   (let ((elems (list "1" "2" "3")))
-    (loop for class in (list (cons '<unordered-list> "list")
-                             (cons '<ordered-list> "enum")) do
+    (loop for class in (list "list" "enum") do
       (test-emit
-       (make-instance (first class)
-                      :children
-                      (loop for elem in elems collecting
-                         (make-instance '<list-item>
-                                        :children (list (make-text elem)))))
        (format nil "<~A>~{<item>~A</item>~}</~A>"
-               (rest class) elems (rest class))))))
-
-(test definition
-  (test-emit (make-instance '<definition>
-                            :term (make-text "term")
-                            :definition (make-text "def"))
-             "<term>term</term><def>def</def>"))
+               class elems class)))))
 
 (test definition-list
-  (test-emit (make-instance '<definition-list>
-                            :children
-                            (list
-                             (make-instance '<definition>
-                                            :term (make-text "term")
-                                            :definition (make-text "def"))))
-             "<deflist><term>term</term><def>def</def></deflist>"))
+  (test-emit "<deflist><term>term</term><def>def</def></deflist>"))
+
+(test image
+  (test-emit "<image src=\"src\" desc=\"\"/>"))
+
+(test figure
+  (test-emit "<figure><image src=\"src\" desc=\"\"/>test</figure>"))
+
+(test tables
+  (test-emit "<table><row><cell>1</cell><cell>2</cell></row></table>"))

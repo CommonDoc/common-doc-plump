@@ -51,16 +51,19 @@ contexts."
   <inline-quote>
   <block-quote>)
 
+(defmethod doc->xml ((content <content-node>))
+  (doc->xml (children content)))
+
 (defmethod doc->xml ((code <code-block>))
   (html (:code :language (language code)
                (doc->xml (children code)))))
 
 (defmethod doc->xml ((ref <document-link>))
   (aif (document-reference ref)
-       (html (:ref :sec (section-reference ref)
-                   (doc->xml (children ref))))
        (html (:ref :doc it
                    :sec (section-reference ref)
+                   (doc->xml (children ref))))
+       (html (:ref :sec (section-reference ref)
                    (doc->xml (children ref))))))
 
 (defmethod doc->xml ((link <web-link>))
@@ -90,13 +93,31 @@ contexts."
                 :desc (description image)
                 "")))
 
+(defmethod doc->xml ((figure <figure>))
+  (html (:figure
+         (doc->xml (image figure))
+         (doc->xml (description figure)))))
+
 ;;; Tables
+
+(defmethod doc->xml ((table <table>))
+  (html (:table
+         (doc->xml (rows table)))))
+
+(defmethod doc->xml ((row <row>))
+  (html (:row
+         (doc->xml (cells row)))))
+
+(defmethod doc->xml ((cell <cell>))
+  (html (:cell
+         (doc->xml (children cell)))))
 
 ;;; Emitter
 
 (defun emit (node)
   "Produce a Plump node from a CommonDoc document."
-  (plump:parse
-   (with-output-to-string (stream)
-     (let ((markup:*output-stream* stream))
-       (doc->xml node)))))
+  (let ((plump:*tag-dispatchers* plump:*xml-tags*))
+    (plump:parse
+     (with-output-to-string (stream)
+       (let ((markup:*output-stream* stream))
+         (doc->xml node))))))

@@ -13,6 +13,8 @@
                 :<definition-list>
                 :<image>
                 :<figure>
+                :<row>
+                :<table>
                 :<section>
                 :<document>)
   (:export :parse)
@@ -146,6 +148,16 @@
                    :description
                    (make-instance '<content-node>
                                   :children (list (parse description))))))
+
+;; Tables
+
+(define-parser "table" (rows)
+  (make-instance '<table>
+                 :rows (parse rows)))
+
+(define-parser "row" (cells)
+  (make-instance '<row>
+                 :cells (parse cells)))
 
 ;; Structure
 

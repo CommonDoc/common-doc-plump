@@ -95,6 +95,18 @@
     (is (equal (text (first (children desc)))
                "desc")))))
 
+(test table
+  (test-parse "<table><row><cell>1</cell><cell>2</cell></row></table>"
+              <table>
+    (is (equal (length (rows parsed))
+               1))
+    (let ((first-row (first (rows parsed))))
+      (is-true (typep first-row '<row>))
+      (is (equal (length (cells first-row)) 2))
+      (let ((first-cell (first (cells first-row))))
+        (is (equal (text (first (children first-cell)))
+                   "1"))))))
+
 (test section
   (test-parse "<section title='title'>test</section>"
               <section>
