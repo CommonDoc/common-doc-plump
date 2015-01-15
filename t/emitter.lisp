@@ -39,16 +39,16 @@
   (test-emit "test"))
 
 (test trivial
-  (trivial-tests <paragraph>
-                 <bold>
-                 <italic>
-                 <underline>
-                 <strikethrough>
-                 <code>
-                 <superscript>
-                 <subscript>
-                 <inline-quote>
-                 <block-quote>))
+  (trivial-tests paragraph
+                 bold
+                 italic
+                 underline
+                 strikethrough
+                 code
+                 superscript
+                 subscript
+                 inline-quote
+                 block-quote))
 
 (test refs
   (test-emit "<ref doc=\"doc\" sec=\"sec\"/>")

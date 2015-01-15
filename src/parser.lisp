@@ -2,21 +2,21 @@
 (defpackage common-doc-plump.parser
   (:use :cl :anaphora)
   (:import-from :common-doc
-                :<content-node>
-                :<text-node>
-                :<code-block>
-                :<document-link>
-                :<web-link>
-                :<definition>
-                :<unordered-list>
-                :<ordered-list>
-                :<definition-list>
-                :<image>
-                :<figure>
-                :<row>
-                :<table>
-                :<section>
-                :<document>)
+                :content-node
+                :text-node
+                :code-block
+                :document-link
+                :web-link
+                :definition
+                :unordered-list
+                :ordered-list
+                :definition-list
+                :image
+                :figure
+                :row
+                :table
+                :section
+                :document)
   (:export :parse)
   (:documentation "Parse a Plump document into a CommonDoc document."))
 (in-package :common-doc-plump.parser)
@@ -45,7 +45,7 @@
   (:documentation "Parse a plump-tex node into a CommonDoc node."))
 
 (defmethod parse ((node plump:text-node))
-  (make-instance '<text-node>
+  (make-instance 'text-node
                  :text (plump:text node)))
 
 (defmethod parse ((vec vector))
@@ -77,7 +77,7 @@
                      (setf (slot-value instance slot-name)
                            (gethash attr-name attributes))))
                  instance)
-               (make-instance 'common-doc.macro:<macro-node>
+               (make-instance 'common-doc.macro:macro-node
                               :name name
                               :metadata attributes
                               :children (parse children)))))))
@@ -106,7 +106,7 @@
 (define-attr-parser "ref" (attributes children)
   (let ((doc-ref (gethash "doc" attributes))
         (sec-ref (gethash "sec" attributes)))
-    (make-instance '<document-link>
+    (make-instance 'document-link
                    :document-reference doc-ref
                    :section-reference sec-ref
                    :children (parse children))))
@@ -114,12 +114,12 @@
 (define-attr-parser "link" (attributes children)
   (let* ((uri-text (gethash "uri" attributes))
          (uri (quri:uri uri-text)))
-    (make-instance '<web-link> :uri uri :children (parse children))))
+    (make-instance 'web-link :uri uri :children (parse children))))
 
 ;; Lists
 
 (define-parser "deflist" (children)
-  (make-instance '<definition-list>
+  (make-instance 'definition-list
                  :children
                  (let* ((children-vector
                           (remove-if-not
@@ -132,31 +132,31 @@
                    (loop for (term def) on element-children
                          by #'cddr
                          collecting
-                     (let ((term (make-instance '<content-node>
+                     (let ((term (make-instance 'content-node
                                                 :children (parse (plump:children term))))
-                           (def (make-instance '<content-node>
+                           (def (make-instance 'content-node
                                                :children (parse (plump:children def)))))
-                       (make-instance '<definition>
+                       (make-instance 'definition
                                       :term term
                                       :definition def))))))
 
 (define-parser "figure" (children)
   (let ((image (find-tag-by-name "image" children))
         (description (tags-without-name "image" children)))
-    (make-instance '<figure>
+    (make-instance 'figure
                    :image (parse image)
                    :description
-                   (make-instance '<content-node>
+                   (make-instance 'content-node
                                   :children (list (parse description))))))
 
 ;; Tables
 
 (define-parser "table" (rows)
-  (make-instance '<table>
+  (make-instance 'table
                  :rows (parse rows)))
 
 (define-parser "row" (cells)
-  (make-instance '<row>
+  (make-instance 'row
                  :cells (parse cells)))
 
 ;; Structure
@@ -164,7 +164,7 @@
 (define-attr-parser "section" (attributes children)
   (let ((title (aif (gethash "title" attributes)
                     ;; We got the title from the attributes
-                    (make-instance '<text-node>
+                    (make-instance 'text-node
                                    :text it)
                     ;; Otherwise, look for a title tag in the children
                     (aif (find-tag-by-name "title" children)
@@ -172,6 +172,6 @@
                          (error "Untitled section."))))
         (children (tags-without-name "title" children))
         (reference (gethash "ref" attributes)))
-    (make-instance '<section> :title title
+    (make-instance 'section :title title
                               :reference reference
                               :children (list (parse children)))))
