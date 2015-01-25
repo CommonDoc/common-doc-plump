@@ -39,8 +39,7 @@
 (test trivial
   (test-parse "test" text-node))
 
-(test-classes paragraph
-              bold
+(test-classes bold
               italic
               underline
               strikethrough
