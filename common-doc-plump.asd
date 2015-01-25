@@ -5,6 +5,7 @@
   :homepage "https://github.com/CommonDoc/common-doc-plump"
   :version "0.1"
   :depends-on (:common-doc
+               :common-doc-split-paragraphs
                :plump
                :anaphora
                :cl-markup)

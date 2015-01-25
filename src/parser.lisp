@@ -53,11 +53,12 @@
     (parse elem)))
 
 (defmethod parse ((root plump:root))
-  (let ((children (parse (plump:children root))))
-    (if (rest children)
-        (make-instance 'content-node
-                       :children children)
-        (first children))))
+  (let* ((children (parse (plump:children root)))
+         (root (if (rest children)
+                   (make-instance 'content-node
+                                  :children children)
+                   (first children))))
+    (common-doc.split-paragraphs:split-paragraphs root)))
 
 (defmethod parse ((node plump:element))
   (let ((name (plump:tag-name node))
