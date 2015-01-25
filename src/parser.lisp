@@ -53,11 +53,11 @@
     (parse elem)))
 
 (defmethod parse ((root plump:root))
-  (let ((child (find-if #'(lambda (node)
-                            (or (plump:element-p node)
-                                (typep node 'plump:text-node)))
-                        (plump:children root))))
-    (parse child)))
+  (let ((children (parse (plump:children root))))
+    (if (rest children)
+        (make-instance 'content-node
+                       :children children)
+        (first children))))
 
 (defmethod parse ((node plump:element))
   (let ((name (plump:tag-name node))
