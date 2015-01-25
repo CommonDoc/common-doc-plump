@@ -33,7 +33,7 @@
 ;;; Tests
 
 (def-suite parser
-  :description "VerTeX parser tests.")
+  :description "common-doc-plump parser tests.")
 (in-suite parser)
 
 (test trivial

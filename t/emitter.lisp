@@ -32,7 +32,7 @@
 ;;; Tests
 
 (def-suite emitter
-  :description "VerTeX emitter tests.")
+  :description "common-doc-plump emitter tests.")
 (in-suite emitter)
 
 (test text
