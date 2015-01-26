@@ -51,7 +51,9 @@
                  block-quote))
 
 (test refs
-  (test-emit "<ref doc=\"doc\" sec=\"sec\"/>")
+  (let ((ref (xml->doc "<ref doc=\"doc\" sec=\"sec\"/>")))
+    (is (equal (document-reference ref) "doc"))
+    (is (equal (section-reference ref) "sec")))
   (test-emit "<ref sec=\"sec\"/>")
   (test-emit "<ref sec=\"sec\">test</ref>"))
 
@@ -69,7 +71,9 @@
   (test-emit "<deflist><term>term</term><def>def</def></deflist>"))
 
 (test image
-  (test-emit "<image src=\"src\" desc=\"\"/>"))
+  (let ((image (xml->doc "<image src=\"src\" desc=\"\"/>")))
+    (is (equal (source image) "src"))
+    (is (equal (description image) ""))))
 
 (test figure
   (test-emit "<figure><image src=\"src\" desc=\"\"/>test</figure>"))
