@@ -54,8 +54,14 @@
   (let ((ref (xml->doc "<ref doc=\"doc\" sec=\"sec\"/>")))
     (is (equal (document-reference ref) "doc"))
     (is (equal (section-reference ref) "sec")))
-  (test-emit "<ref sec=\"sec\"/>")
-  (test-emit "<ref sec=\"sec\">test</ref>"))
+  (let ((ref (xml->doc "<ref sec=\"sec\"/>")))
+    (is (null (document-reference ref)))
+    (is (equal (section-reference ref) "sec")))
+  (let ((ref (xml->doc "<ref sec=\"sec\">test</ref>")))
+    (is (null (document-reference ref)))
+    (is (equal (section-reference ref) "sec"))
+    (is (equal (text (first (children ref)))
+               "test"))))
 
 (test links
   (test-emit "<link uri=\"http://example.com/\">test</link>"))
