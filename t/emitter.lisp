@@ -82,7 +82,10 @@
     (is (equal (description image) ""))))
 
 (test figure
-  (test-emit "<figure><image src=\"src\" desc=\"\"/>test</figure>"))
+  (let* ((fig (xml->doc "<figure><image src=\"src\" desc=\"\"/>test</figure>"))
+         (image (image fig)))
+    (is (equal (source image) "src"))
+    (is (equal (description image) ""))))
 
 (test tables
   (test-emit "<table><row><cell>1</cell><cell>2</cell></row></table>"))

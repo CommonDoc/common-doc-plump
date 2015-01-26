@@ -147,8 +147,9 @@
     (make-instance 'figure
                    :image (parse image)
                    :description
-                   (make-instance 'content-node
-                                  :children (list (parse description))))))
+                   (list
+                    (make-instance 'content-node
+                                   :children (list (parse description)))))))
 
 ;; Tables
 
