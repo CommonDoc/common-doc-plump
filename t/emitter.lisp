@@ -51,9 +51,17 @@
                  block-quote))
 
 (test refs
-  (test-emit "<ref doc=\"doc\" sec=\"sec\"/>")
-  (test-emit "<ref sec=\"sec\"/>")
-  (test-emit "<ref sec=\"sec\">test</ref>"))
+  (let ((ref (xml->doc "<ref doc=\"doc\" sec=\"sec\"/>")))
+    (is (equal (document-reference ref) "doc"))
+    (is (equal (section-reference ref) "sec")))
+  (let ((ref (xml->doc "<ref sec=\"sec\"/>")))
+    (is (null (document-reference ref)))
+    (is (equal (section-reference ref) "sec")))
+  (let ((ref (xml->doc "<ref sec=\"sec\">test</ref>")))
+    (is (null (document-reference ref)))
+    (is (equal (section-reference ref) "sec"))
+    (is (equal (text (first (children ref)))
+               "test"))))
 
 (test links
   (test-emit "<link uri=\"http://example.com/\">test</link>"))
@@ -69,10 +77,15 @@
   (test-emit "<deflist><term>term</term><def>def</def></deflist>"))
 
 (test image
-  (test-emit "<image src=\"src\" desc=\"\"/>"))
+  (let ((image (xml->doc "<image src=\"src\" desc=\"\"/>")))
+    (is (equal (source image) "src"))
+    (is (equal (description image) ""))))
 
 (test figure
-  (test-emit "<figure><image src=\"src\" desc=\"\"/>test</figure>"))
+  (let* ((fig (xml->doc "<figure><image src=\"src\" desc=\"\"/>test</figure>"))
+         (image (image fig)))
+    (is (equal (source image) "src"))
+    (is (equal (description image) ""))))
 
 (test tables
   (test-emit "<table><row><cell>1</cell><cell>2</cell></row></table>"))
