@@ -2,8 +2,10 @@
   :author "Fernando Borretti <eudoxiahp@gmail.com>"
   :maintainer "Fernando Borretti <eudoxiahp@gmail.com>"
   :license "MIT"
-  :homepage "https://github.com/CommonDoc/common-doc-plump"
   :version "0.1"
+  :homepage "https://github.com/CommonDoc/common-doc-plump"
+  :bug-tracker "https://github.com/CommonDoc/common-doc-plump/issues"
+  :source-control (:git "git@github.com:CommonDoc/common-doc-plump.git")
   :depends-on (:common-doc
                :common-doc-split-paragraphs
                :plump
