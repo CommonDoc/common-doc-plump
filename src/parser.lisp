@@ -16,7 +16,8 @@
                 :row
                 :table
                 :section
-                :document)
+                :document
+                :children)
   (:export :parse)
   (:documentation "Parse a Plump document into a CommonDoc document."))
 (in-package :common-doc-plump.parser)
@@ -54,11 +55,12 @@
 
 (defmethod parse ((root plump:root))
   (let* ((children (parse (plump:children root)))
-         (root (if (rest children)
-                   (make-instance 'content-node
-                                  :children children)
-                   (first children))))
-    (common-doc.split-paragraphs:split-paragraphs root)))
+         (root (make-instance 'content-node
+                              :children children))
+         (doc-with-paragraphs (common-doc.split-paragraphs:split-paragraphs root)))
+    (if (rest (children doc-with-paragraphs))
+        doc-with-paragraphs
+        (first (children doc-with-paragraphs)))))
 
 (defmethod parse ((node plump:element))
   (let ((name (plump:tag-name node))
