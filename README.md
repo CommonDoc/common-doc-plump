@@ -9,6 +9,6 @@ Translate a Plump DOM into a CommonDoc document and back. This is used by
 
 # License
 
-Copyright (c) 2014 Fernando Borretti
+Copyright (c) 2015 Fernando Borretti
 
 Licensed under the MIT License.
