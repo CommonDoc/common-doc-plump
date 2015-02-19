@@ -177,5 +177,5 @@
         (children (tags-without-name "title" children))
         (reference (gethash "ref" attributes)))
     (make-instance 'section :title title
-                              :reference reference
-                              :children (list (parse children)))))
+                            :reference reference
+                            :children (list (parse children)))))
