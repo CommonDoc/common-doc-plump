@@ -113,3 +113,13 @@
                "title"))
     (is (equal (text (first (children parsed)))
                "test"))))
+
+(test nested-section
+  (test-parse "<section title='parent'><section title='child'>test</section></section>"
+              section
+    (is (equal (text (title parsed))
+               "parent"))
+    (is (equal (text (title (first (children parsed))))
+               "child"))
+    (is (equal (text (first (children (first (children parsed)))))
+               "test"))))
