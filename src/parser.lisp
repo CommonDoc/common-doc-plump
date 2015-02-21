@@ -37,8 +37,9 @@
 
 (defun tags-without-name (tag-name vector)
   (find-if-not #'(lambda (node)
-                   (and (plump:element-p node)
-                        (equal (plump:tag-name node) tag-name)))
+                   (if (plump:element-p node)
+                       (equal (plump:tag-name node) tag-name)
+                       t))
                vector))
 
 ;;; Methods
