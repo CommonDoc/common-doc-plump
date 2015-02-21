@@ -10,6 +10,7 @@
                 :definition
                 :unordered-list
                 :ordered-list
+                :list-item
                 :definition-list
                 :image
                 :figure
@@ -135,13 +136,35 @@
                    (loop for (term def) on element-children
                          by #'cddr
                          collecting
-                     (let ((term (make-instance 'content-node
-                                                :children (parse (plump:children term))))
-                           (def (make-instance 'content-node
-                                               :children (parse (plump:children def)))))
+                     (let ((term (parse (plump:children term)))
+                           (def (parse (plump:children def))))
                        (make-instance 'definition
                                       :term term
                                       :definition def))))))
+
+(define-parser "list" (children)
+  (make-instance 'unordered-list
+                 :children
+                 (let ((children-vector
+                         (remove-if-not
+                          #'(lambda (child)
+                              (plump:element-p child))
+                          children)))
+                   (loop for elem across children-vector collecting
+                     (make-instance 'list-item
+                                    :children (parse (plump:children elem)))))))
+
+(define-parser "enum" (children)
+  (make-instance 'ordered-list
+                 :children
+                 (let ((children-vector
+                         (remove-if-not
+                          #'(lambda (child)
+                              (plump:element-p child))
+                          children)))
+                   (loop for elem across children-vector collecting
+                     (make-instance 'list-item
+                                    :children (parse (plump:children elem)))))))
 
 (define-parser "figure" (children)
   (let ((image (find-tag-by-name "image" children))

@@ -51,7 +51,8 @@
               list-item)
 
 (test code
-  (test-parse (mk-tag "code") code-block
+  (test-parse (mk-tag "code")
+              code-block
     (test-child)))
 
 (test refs
@@ -72,10 +73,17 @@
     (let* ((elems (list "test" "test" "test"))
            (list-xml (format nil "<~A>~{<item>~A</item>~}</~A>"
                              list-type elems list-type)))
-      (test-parse list-xml base-list
+      (test-parse list-xml
+                  base-list
         (loop for child in (children parsed) do
           (is-true (typep child 'list-item))
           (is (equal (text (first (children child))) "test")))))))
+
+(test deflist
+  (test-parse "<deflist><term>term</term><def>def</def></deflist>"
+              definition-list
+    (is (equal (length (children parsed))
+               1))))
 
 (test image
   (test-parse "<image src='src' desc='desc'/>"
