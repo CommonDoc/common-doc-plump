@@ -39,7 +39,7 @@
   (loop for elem across
                  (remove-if #'(lambda (node)
                                 (if (plump:element-p node)
-                                    (not (equal (plump:tag-name node) tag-name))
+                                    (equal (plump:tag-name node) tag-name)
                                     nil))
                             vector)
         collecting elem))
