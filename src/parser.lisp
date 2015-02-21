@@ -36,11 +36,13 @@
            vector))
 
 (defun tags-without-name (tag-name vector)
-  (find-if-not #'(lambda (node)
-                   (if (plump:element-p node)
-                       (equal (plump:tag-name node) tag-name)
-                       t))
-               vector))
+  (loop for elem across
+                 (remove-if #'(lambda (node)
+                                (if (plump:element-p node)
+                                    (not (equal (plump:tag-name node) tag-name))
+                                    nil))
+                            vector)
+        collecting elem))
 
 ;;; Methods
 
@@ -173,9 +175,8 @@
     (make-instance 'figure
                    :image (parse image)
                    :description
-                   (list
-                    (make-instance 'content-node
-                                   :children (list (parse description)))))))
+                   (loop for elem in description collecting
+                     (parse elem)))))
 
 ;; Tables
 
@@ -202,4 +203,5 @@
         (reference (gethash "ref" attributes)))
     (make-instance 'section :title title
                             :reference reference
-                            :children (list (parse children)))))
+                            :children (loop for elem in children collecting
+                                        (parse elem)))))
