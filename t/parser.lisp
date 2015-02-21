@@ -131,3 +131,37 @@
                "child"))
     (is (equal (text (first (children (first (children parsed)))))
                "test"))))
+
+(test real-world-list
+  (test-parse
+   "<list>
+      <item>1</item>
+      <item>2</item>
+      <item>3</item>
+   </list>"
+   unordered-list
+   (let ((children (children parsed)))
+     (is (equal (length children)
+                3))
+     (loop for child in children do
+       (is-true (typep child 'list-item)))
+     (is (equal (text (first (children (first children))))
+         "1"))
+     (is (equal (text (first (children (second children))))
+         "2"))
+     (is (equal (text (first (children (third children))))
+         "3")))))
+
+(test real-world-deflist
+  (test-parse
+   "<deflist>
+      <term>a</term>
+      <def>1</def>
+
+      <term>b></term>
+      <def>2</def>
+    </deflist>"
+   definition-list
+   (let ((defs (children parsed)))
+     (is (equal (length defs)
+                2)))))
