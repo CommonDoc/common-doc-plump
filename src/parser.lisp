@@ -197,7 +197,7 @@
                                          :text it))
                     ;; Otherwise, look for a title tag in the children
                     (aif (find-tag-by-name "title" children)
-                         (parse it)
+                         (parse (plump:children it))
                          (error "Untitled section."))))
         (children (tags-without-name "title" children))
         (reference (gethash "ref" attributes)))

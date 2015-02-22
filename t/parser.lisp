@@ -132,6 +132,16 @@
     (is (equal (text (first (children (first (children parsed)))))
                "test"))))
 
+(test section-with-title-node
+  (test-parse "<section><title>title</title>test</section>"
+              section
+    (is (equal (text (first (title parsed)))
+               "title"))
+    (is (equal (length (children parsed))
+               1))
+    (is (equal (text (first (children parsed)))
+               "test"))))
+
 (test real-world-list
   (test-parse
    "<list>
