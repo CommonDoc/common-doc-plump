@@ -142,6 +142,20 @@
     (is (equal (text (first (children parsed)))
                "test"))))
 
+(test section-with-bold-title
+  (test-parse "<section><title>title <b>bold</b></title>test</section>"
+              section
+    (is (equal (length (title parsed))
+               2))
+    (is (equal (text (first (title parsed)))
+               "title "))
+    (is (equal (text (first (children (second (title parsed)))))
+               "bold"))
+    (is (equal (length (children parsed))
+               1))
+    (is (equal (text (first (children parsed)))
+               "test"))))
+
 (test real-world-list
   (test-parse
    "<list>
