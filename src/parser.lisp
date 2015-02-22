@@ -193,8 +193,8 @@
 (define-attr-parser "section" (attributes children)
   (let ((title (aif (gethash "title" attributes)
                     ;; We got the title from the attributes
-                    (make-instance 'text-node
-                                   :text it)
+                    (list (make-instance 'text-node
+                                         :text it))
                     ;; Otherwise, look for a title tag in the children
                     (aif (find-tag-by-name "title" children)
                          (parse it)
