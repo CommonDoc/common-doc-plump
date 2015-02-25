@@ -62,7 +62,12 @@
 (defmethod parse ((vec vector))
   (remove-if #'null
              (loop for elem across vec collecting
-                                       (parse elem))))
+               (parse elem))))
+
+(defmethod parse ((list list))
+  (remove-if #'null
+             (loop for elem in list collecting
+               (parse elem))))
 
 (defmethod parse ((root plump:root))
   (let* ((children (parse (plump:children root)))
@@ -181,9 +186,7 @@
         (description (tags-without-name "image" children)))
     (make-instance 'figure
                    :image (parse image)
-                   :description
-                   (loop for elem in description collecting
-                     (parse elem)))))
+                   :description (parse description))))
 
 ;; Tables
 
@@ -210,5 +213,4 @@
         (reference (gethash "ref" attributes)))
     (make-instance 'section :title title
                             :reference reference
-                            :children (loop for elem in children collecting
-                                        (parse elem)))))
+                            :children (parse children))))
