@@ -44,6 +44,9 @@
                             vector)
         collecting elem))
 
+(defun trim-whitespace (string)
+  (string-trim '(#\Newline #\Space #\Tab) string))
+
 ;;; Methods
 
 (defgeneric parse (obj)
