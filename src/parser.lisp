@@ -53,12 +53,16 @@
   (:documentation "Parse a plump-tex node into a CommonDoc node."))
 
 (defmethod parse ((node plump:text-node))
-  (make-instance 'text-node
-                 :text (plump:text node)))
+  (let ((text (trim-whitespace (plump:text node))))
+    (if (equal text "")
+        nil
+        (make-instance 'text-node
+                       :text (plump:text node)))))
 
 (defmethod parse ((vec vector))
-  (loop for elem across vec collecting
-    (parse elem)))
+  (remove-if #'null
+             (loop for elem across vec collecting
+                                       (parse elem))))
 
 (defmethod parse ((root plump:root))
   (let* ((children (parse (plump:children root)))
@@ -138,7 +142,7 @@
                            children))
                         (element-children
                           (loop for elem across children-vector
-                                collecting elem)))
+                            collecting elem)))
                    (loop for (term def) on element-children
                          by #'cddr
                          collecting
