@@ -19,7 +19,10 @@
                 :section
                 :document
                 :children)
-  (:export :parse)
+  (:export :parse
+           :parse-document
+           :find-tag-by-name
+           :tags-without-name)
   (:documentation "Parse a Plump document into a CommonDoc document."))
 (in-package :common-doc-plump.parser)
 
@@ -80,11 +83,12 @@
   "Parse a list."
   (remove-if #'null
              (loop for elem in list collecting
-               (parse elem))))
+                                    (parse elem))))
 
 (defmethod parse ((root plump:root))
   "Parse a Plump root element."
-  (let* ((children (parse (plump:children root)))
+  (let* ((children (parse (tags-without-name (list "title")
+                                             (plump:children root))))
          (root (make-instance 'content-node
                               :children children))
          (doc-with-paragraphs (common-doc.split-paragraphs:split-paragraphs root)))
@@ -116,6 +120,15 @@
                               :metadata attributes
                               :children (parse children)))))))
 
+(defun parse-document (node)
+  "Parse a Plump node into a document."
+  (let* ((title (find-tag-by-name "title" (plump:children root)))
+         (contents (parse node)))
+    (make-instance 'document
+                   :title (if title
+                              title
+                              "")
+                   :contents contents)))
 ;;; Parsers
 
 (defmacro define-attr-parser (name (attrs args) &rest body)
