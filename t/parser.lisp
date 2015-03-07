@@ -30,6 +30,12 @@
      (is-true (typep text-node 'text-node))
      (is-true (text text-node) "test")))
 
+(defmacro parse-doc ((doc xml) &rest tests)
+  `(let* ((plump:*tag-dispatchers* plump:*xml-tags*)
+          (plump-node (plump:parse ,xml))
+          (,doc (common-doc-plump.parser:parse-document plump-node)))
+     ,@tests))
+
 ;;; Tests
 
 (def-suite parser
@@ -189,3 +195,9 @@
    (let ((defs (children parsed)))
      (is (equal (length defs)
                 2)))))
+
+(test parse-document
+  (parse-doc (doc "<title>a</title>derp")
+    (is
+     (equal (title doc)
+            "a"))))
