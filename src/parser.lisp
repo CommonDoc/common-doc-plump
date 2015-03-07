@@ -30,12 +30,15 @@
 ;;; Utilities
 
 (defun find-tag-by-name (tag-name vector)
+  "Find a Plump tag in a vector by tag name."
   (find-if #'(lambda (node)
                (and (plump:element-p node)
                     (equal (plump:tag-name node) tag-name)))
            vector))
 
 (defun tags-without-name (tag-name-or-list vector)
+  "Return a list of Plump tags in a vector whose tag name is not equal to
+`tag-name-or-list`, which can be a string or a list of strings."
   (loop for elem across
                  (remove-if #'(lambda (node)
                                 (if (plump:element-p node)
@@ -51,6 +54,7 @@
         collecting elem))
 
 (defun trim-whitespace (string)
+  "Trim whitespace from a string."
   (string-trim '(#\Newline #\Space #\Tab) string))
 
 ;;; Methods
@@ -59,6 +63,7 @@
   (:documentation "Parse a plump-tex node into a CommonDoc node."))
 
 (defmethod parse ((node plump:text-node))
+  "Parse a Plump text node."
   (let ((text (trim-whitespace (plump:text node))))
     (if (equal text "")
         nil
@@ -66,16 +71,19 @@
                        :text (plump:text node)))))
 
 (defmethod parse ((vec vector))
+  "Parse a vector of Plump nodes."
   (remove-if #'null
              (loop for elem across vec collecting
                (parse elem))))
 
 (defmethod parse ((list list))
+  "Parse a list."
   (remove-if #'null
              (loop for elem in list collecting
                (parse elem))))
 
 (defmethod parse ((root plump:root))
+  "Parse a Plump root element."
   (let* ((children (parse (plump:children root)))
          (root (make-instance 'content-node
                               :children children))
@@ -85,6 +93,7 @@
         (first (children doc-with-paragraphs)))))
 
 (defmethod parse ((node plump:element))
+  "Parse a Plump element."
   (let ((name (plump:tag-name node))
         (attributes (plump:attributes node))
         (children (plump:children node)))
