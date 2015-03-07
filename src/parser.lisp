@@ -128,7 +128,9 @@
                    :title (if title
                               (plump:text title)
                               "")
-                   :children children)))
+                   :children (if (listp children)
+                                 children
+                                 (list children)))))
 ;;; Parsers
 
 (defmacro define-attr-parser (name (attrs args) &rest body)
