@@ -122,13 +122,13 @@
 
 (defun parse-document (node)
   "Parse a Plump node into a document."
-  (let* ((title (find-tag-by-name "title" (plump:children root)))
-         (contents (parse node)))
+  (let* ((title (find-tag-by-name "title" (plump:children node)))
+         (children (parse node)))
     (make-instance 'document
                    :title (if title
-                              title
+                              (plump:text title)
                               "")
-                   :contents contents)))
+                   :children children)))
 ;;; Parsers
 
 (defmacro define-attr-parser (name (attrs args) &rest body)
