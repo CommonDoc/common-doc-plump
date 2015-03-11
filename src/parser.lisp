@@ -22,13 +22,16 @@
   (:export :parse
            :parse-document
            :find-tag-by-name
-           :tags-without-name)
+           :tags-without-name
+           :*serializer*)
   (:documentation "Parse a Plump document into a CommonDoc document."))
 (in-package :common-doc-plump.parser)
 
 ;;; Variables
 
 (defparameter *parsers* (make-hash-table :test #'equal))
+
+(defvar *serializer* nil)
 
 ;;; Utilities
 
@@ -96,29 +99,41 @@
         doc-with-paragraphs
         (first (children doc-with-paragraphs)))))
 
+(defun parse-verbatim (node)
+  "Parse a node with verbatim text."
+  (make-instance 'text-node
+                 :text (with-output-to-string (stream)
+                         (funcall *serializer*
+                                  (plump:make-root
+                                   (plump:children node))
+                                  stream))))
+
 (defmethod parse ((node plump:element))
   "Parse a Plump element."
   (let ((name (plump:tag-name node))
         (attributes (plump:attributes node))
         (children (plump:children node)))
-    (aif (gethash name *parsers*)
-         (funcall it attributes children)
-         (let* ((tag-class (common-doc:find-node name))
-                (special-slots (common-doc:find-special-slots tag-class)))
-           (if tag-class
-               (let ((instance (if (> (length children) 0)
-                                   (make-instance tag-class
-                                                  :children (parse children))
-                                   (make-instance tag-class))))
-                 (when special-slots
-                   (loop for (attr-name . slot-name) in special-slots do
-                     (setf (slot-value instance slot-name)
-                           (gethash attr-name attributes))))
-                 instance)
-               (make-instance 'common-doc.macro:macro-node
-                              :name name
-                              :metadata attributes
-                              :children (parse children)))))))
+    (if (equal name "verb")
+        ;; Verbatim input
+        (parse-verbatim node)
+        (aif (gethash name *parsers*)
+             (funcall it attributes children)
+             (let* ((tag-class (common-doc:find-node name))
+                    (special-slots (common-doc:find-special-slots tag-class)))
+               (if tag-class
+                   (let ((instance (if (> (length children) 0)
+                                       (make-instance tag-class
+                                                      :children (parse children))
+                                       (make-instance tag-class))))
+                     (when special-slots
+                       (loop for (attr-name . slot-name) in special-slots do
+                         (setf (slot-value instance slot-name)
+                               (gethash attr-name attributes))))
+                     instance)
+                   (make-instance 'common-doc.macro:macro-node
+                                  :name name
+                                  :metadata attributes
+                                  :children (parse children))))))))
 
 (defun parse-document (node)
   "Parse a Plump node into a document."
