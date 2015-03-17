@@ -21,7 +21,7 @@
                 :children)
   (:export :parse
            :parse-document
-           :find-tag-by-name
+           :find-tags-by-name
            :tags-without-name
            :*serializer*)
   (:documentation "Parse a Plump document into a CommonDoc document."))
@@ -35,12 +35,14 @@
 
 ;;; Utilities
 
-(defun find-tag-by-name (tag-name vector)
+(defun find-tags-by-name (tag-name vector)
   "Find a Plump tag in a vector by tag name."
-  (find-if #'(lambda (node)
-               (and (plump:element-p node)
-                    (equal (plump:tag-name node) tag-name)))
-           vector))
+  (loop for elem across
+                 (remove-if-not #'(lambda (node)
+                                    (and (plump:element-p node)
+                                         (equal (plump:tag-name node) tag-name)))
+                                vector)
+    collecting elem))
 
 (defun tags-without-name (tag-name-or-list vector)
   "Return a list of Plump tags in a vector whose tag name is not equal to
@@ -137,7 +139,7 @@
 
 (defun parse-document (node)
   "Parse a Plump node into a document."
-  (let* ((title (find-tag-by-name "title" (plump:children node)))
+  (let* ((title (first (find-tags-by-name "title" (plump:children node))))
          (children (parse node)))
     (make-instance 'document
                    :title (if title
@@ -227,7 +229,7 @@
                                     :children (parse (plump:children elem)))))))
 
 (define-parser "figure" (children)
-  (let ((image (find-tag-by-name "image" children))
+  (let ((image (first (find-tags-by-name "image" children)))
         (description (tags-without-name "image" children)))
     (make-instance 'figure
                    :image (parse image)
@@ -251,7 +253,7 @@
                     (list (make-instance 'text-node
                                          :text it))
                     ;; Otherwise, look for a title tag in the children
-                    (aif (find-tag-by-name "title" children)
+                    (aif (first (find-tags-by-name "title" children))
                          (parse (plump:children it))
                          (error "Untitled section."))))
         (children (tags-without-name "title" children))
