@@ -21,7 +21,8 @@ script:
                  (lambda (c h)
                    (declare (ignore c h))
                    (uiop:quit -1)))'
-       -e '(coveralls:with-coveralls (ql:quickload :common-doc-plump-test))'
+       -e '(coveralls:with-coveralls ()
+             (ql:quickload :common-doc-plump-test))'
 
 notifications:
   email:
