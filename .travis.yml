@@ -2,7 +2,7 @@ language: common-lisp
 
 env:
   matrix:
-    - LISP=sbcl
+    - LISP=sbcl COVERALLS=true
     - LISP=ccl
 
 install:
@@ -10,6 +10,8 @@ install:
   - curl https://raw.githubusercontent.com/luismbo/cl-travis/master/install.sh | bash
   # Clone the latest common-doc
   - git clone https://github.com/CommonDoc/common-doc.git ~/lisp/common-doc
+  # coveralls.io
+  - git clone https://github.com/fukamachi/cl-coveralls ~/lisp/cl-coveralls
 
 script:
   - cl -e '(ql:quickload :fiveam)'
@@ -19,7 +21,7 @@ script:
                  (lambda (c h)
                    (declare (ignore c h))
                    (uiop:quit -1)))'
-       -e '(ql:quickload :common-doc-plump-test)'
+       -e '(coveralls:with-coveralls () (ql:quickload :common-doc-plump-test))'
 
 notifications:
   email:
