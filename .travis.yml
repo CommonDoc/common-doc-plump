@@ -14,7 +14,7 @@ install:
   - git clone https://github.com/fukamachi/cl-coveralls ~/lisp/cl-coveralls
 
 script:
-  - cl -e '(ql:quickload :fiveam)'
+  - cl -l fiveam -l cl-coveralls
        -e '(setf fiveam:*debug-on-error* t
                  fiveam:*debug-on-failure* t)'
        -e '(setf *debugger-hook*
