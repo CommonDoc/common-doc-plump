@@ -115,27 +115,33 @@
   (let ((name (plump:tag-name node))
         (attributes (plump:attributes node))
         (children (plump:children node)))
-    (if (equal name "verb")
-        ;; Verbatim input
-        (parse-verbatim node)
-        (aif (gethash name *parsers*)
-             (funcall it attributes children)
-             (let* ((tag-class (common-doc:find-node name))
-                    (special-slots (common-doc:find-special-slots tag-class)))
-               (if tag-class
-                   (let ((instance (if (> (length children) 0)
-                                       (make-instance tag-class
-                                                      :children (parse children))
-                                       (make-instance tag-class))))
-                     (when special-slots
-                       (loop for (attr-name . slot-name) in special-slots do
-                         (setf (slot-value instance slot-name)
-                               (gethash attr-name attributes))))
-                     instance)
-                   (make-instance 'common-doc.macro:macro-node
-                                  :name name
-                                  :metadata attributes
-                                  :children (parse children))))))))
+    (cond
+      ((equal name "verb")
+       ;; Verbatim input
+       (parse-verbatim node))
+      ((equal name "div")
+       ;; Content node
+       (make-instance 'content-node
+                      :children (parse children)))
+      (t
+       (aif (gethash name *parsers*)
+            (funcall it attributes children)
+            (let* ((tag-class (common-doc:find-node name))
+                   (special-slots (common-doc:find-special-slots tag-class)))
+              (if tag-class
+                  (let ((instance (if (> (length children) 0)
+                                      (make-instance tag-class
+                                                     :children (parse children))
+                                      (make-instance tag-class))))
+                    (when special-slots
+                      (loop for (attr-name . slot-name) in special-slots do
+                        (setf (slot-value instance slot-name)
+                              (gethash attr-name attributes))))
+                    instance)
+                  (make-instance 'common-doc.macro:macro-node
+                                 :name name
+                                 :metadata attributes
+                                 :children (parse children)))))))))
 
 (defun parse-document (node)
   "Parse a Plump node into a document."
