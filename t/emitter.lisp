@@ -1,8 +1,6 @@
 (in-package :cl-user)
 (defpackage common-doc-plump-test.emitter
   (:use :cl :fiveam :common-doc)
-  (:import-from :common-doc.util
-                :make-text)
   (:export :emitter))
 (in-package :common-doc-plump-test.emitter)
 
