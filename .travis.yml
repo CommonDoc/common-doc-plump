@@ -23,6 +23,7 @@ script:
                    (declare (ignore c h))
                    (uiop:quit -1)))'
        -e '(coveralls:with-coveralls (:exclude (list "t"))
+             (asdf:compile-system :common-doc-plump :force t)
              (ql:quickload :common-doc-plump-test))'
 
 notifications:
