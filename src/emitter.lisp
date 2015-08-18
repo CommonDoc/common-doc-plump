@@ -61,9 +61,9 @@ contexts."
 (defmethod doc->xml ((ref document-link))
   (aif (document-reference ref)
        (html (:ref :doc it
-                   :sec (section-reference ref)
+                   :id (node-reference ref)
                    (doc->xml (children ref))))
-       (html (:ref :sec (section-reference ref)
+       (html (:ref :id (node-reference ref)
                    (doc->xml (children ref))))))
 
 (defmethod doc->xml ((link web-link))

@@ -51,13 +51,13 @@
 (test refs
   (let ((ref (xml->doc "<ref doc=\"doc\" sec=\"sec\"/>")))
     (is (equal (document-reference ref) "doc"))
-    (is (equal (section-reference ref) "sec")))
+    (is (equal (node-reference ref) "sec")))
   (let ((ref (xml->doc "<ref sec=\"sec\"/>")))
     (is (null (document-reference ref)))
-    (is (equal (section-reference ref) "sec")))
+    (is (equal (node-reference ref) "sec")))
   (let ((ref (xml->doc "<ref sec=\"sec\">test</ref>")))
     (is (null (document-reference ref)))
-    (is (equal (section-reference ref) "sec"))
+    (is (equal (node-reference ref) "sec"))
     (is (equal (text (first (children ref)))
                "test"))))
 

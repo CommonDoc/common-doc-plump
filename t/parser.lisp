@@ -65,7 +65,12 @@
   (test-parse "<ref doc='document' sec='section'>test</ref>"
               document-link
     (is (equal (document-reference parsed) "document"))
-    (is (equal (section-reference parsed) "section"))
+    (is (equal (node-reference parsed) "section"))
+    (test-child))
+  (test-parse "<ref doc='document' id='section'>test</ref>"
+              document-link
+    (is (equal (document-reference parsed) "document"))
+    (is (equal (node-reference parsed) "section"))
     (test-child)))
 
 (test links

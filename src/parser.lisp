@@ -4,7 +4,6 @@
   (:import-from :common-doc
                 :content-node
                 :text-node
-                :code-block
                 :document-link
                 :web-link
                 :definition
@@ -63,7 +62,7 @@
 
 (defun trim-whitespace (string)
   "Trim whitespace from a string."
-  (string-trim '(#\Newline #\Space #\Tab) string))
+  (string-trim '(#\Space #\Tab) string))
 
 ;;; Methods
 
@@ -177,10 +176,13 @@
 
 (define-attr-parser "ref" (attributes children)
   (let ((doc-ref (gethash "doc" attributes))
-        (sec-ref (gethash "sec" attributes)))
+        (node-ref (or (gethash "id" attributes)
+                      ;; Bugwards compatibility, from when it was only possible
+                      ;; to link to sections
+                      (gethash "sec" attributes))))
     (make-instance 'document-link
                    :document-reference doc-ref
-                   :section-reference sec-ref
+                   :node-reference node-ref
                    :children (parse children))))
 
 (define-attr-parser "link" (attributes children)
