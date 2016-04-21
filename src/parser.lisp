@@ -2,6 +2,7 @@
 (defpackage common-doc-plump.parser
   (:use :cl :anaphora)
   (:import-from :common-doc
+                :reference
                 :content-node
                 :text-node
                 :document-link
@@ -111,9 +112,11 @@
 
 (defmethod parse ((node plump:element))
   "Parse a Plump element."
-  (let ((name (plump:tag-name node))
-        (attributes (plump:attributes node))
-        (children (plump:children node)))
+  (let* ((name (plump:tag-name node))
+         (attributes (plump:attributes node))
+         (reference (or (gethash "id" attributes)
+                        (gethash "ref" attributes)))
+         (children (plump:children node)))
     (cond
       ((equal name "verb")
        ;; Verbatim input
@@ -123,24 +126,36 @@
        (make-instance 'content-node
                       :children (parse children)))
       (t
-       (aif (gethash name *parsers*)
-            (funcall it attributes children)
-            (let* ((tag-class (common-doc:find-node name))
-                   (special-slots (common-doc:find-special-slots tag-class)))
-              (if tag-class
-                  (let ((instance (if (> (length children) 0)
-                                      (make-instance tag-class
-                                                     :children (parse children))
-                                      (make-instance tag-class))))
-                    (when special-slots
-                      (loop for (attr-name . slot-name) in special-slots do
-                        (setf (slot-value instance slot-name)
-                              (gethash attr-name attributes))))
-                    instance)
-                  (make-instance 'common-doc.macro:macro-node
-                                 :name name
-                                 :metadata attributes
-                                 :children (parse children)))))))))
+       (let ((node
+               (aif (gethash name *parsers*)
+                    (let ((node (funcall it attributes children)))
+
+                      (loop for key being the hash-keys of attributes
+                            for value being the hash-values of attributes
+                            do
+                               (unless (or (string= key "ref")
+                                           (string= key "id"))
+                                 (setf (common-doc:get-meta node key) value)))
+                      node)
+                    (let* ((tag-class (or (common-doc:find-node name)
+                                          (error "No node with name ~A" name)))
+                           (special-slots (common-doc:find-special-slots tag-class)))
+                      (if tag-class
+                          (let ((instance (if (> (length children) 0)
+                                              (make-instance tag-class
+                                                             :children (parse children))
+                                              (make-instance tag-class))))
+                            (when special-slots
+                              (loop for (attr-name . slot-name) in special-slots do
+                                (setf (slot-value instance slot-name)
+                                      (gethash attr-name attributes))))
+                            instance)
+                          (make-instance 'common-doc.macro:macro-node
+                                         :name name
+                                         :metadata attributes
+                                         :children (parse children)))))))
+         (setf (reference node) reference)
+         node)))))
 
 (defun parse-document (node)
   "Parse a Plump node into a document."
@@ -264,8 +279,6 @@
                     (aif (first (find-tags-by-name "title" children))
                          (parse (plump:children it))
                          (error "Untitled section."))))
-        (children (tags-without-name "title" children))
-        (reference (gethash "ref" attributes)))
+        (children (tags-without-name "title" children)))
     (make-instance 'section :title title
-                            :reference reference
                             :children (parse children))))
